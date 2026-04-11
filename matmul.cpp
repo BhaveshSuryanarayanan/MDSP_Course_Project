@@ -1,59 +1,76 @@
-#include <matmul.h>
-typedef ap_axis<32,0,0,0> axis_t;
+#include "matmul.h"
 
-void matmul_stream(hls::stream<axis_t> &in,
-                   hls::stream<axis_t> &out,
+// Union - all members share same memory location
+// same bits interpreted as different datatypes
+union float_bits {
+    float    f;
+    unsigned u;
+};
+
+static inline data_t unpack(ap_int<AP_SIZE> raw){
+    #ifdef USE_FIXED
+        data_t val;
+        val.range() = raw.range(DATA_WIDTH-1, 0); // take the first "DATA_WIDTH" bits and discard the rest
+        return val;
+    #else
+        float_bits fb;
+        fb.u = (unsigned) raw; // store the raw bits as it is
+        return fb.f;  // reinterpret as float
+    #endif
+}
+
+// in_stream: input data (x)
+// out_stream: output data (y)
+// N : A register that determines the number of inputs (set by CPU)
+void matmul_stream(hls::stream<axis_t> &in_stream,
+                   hls::stream<axis_t> &out_stream,
                    int N) {
 
-#pragma HLS INTERFACE axis port=in
-#pragma HLS INTERFACE axis port=out
-
-#pragma HLS INTERFACE s_axilite port=N
+#pragma HLS INTERFACE axis port=in_stream
+#pragma HLS INTERFACE axis port=out_stream
+#pragma HLS INTERFACE s_axilite port=N  
 #pragma HLS INTERFACE s_axilite port=return
 
-    float A[MAT_SIZE][MAT_SIZE];
-    float B[MAT_SIZE][MAT_SIZE];
-    float C[MAT_SIZE][MAT_SIZE];
+    static data_t X[MAT_SIZE] = {0};
+    static data_t A[MAT_SIZE][MAT_SIZE] = {0};
+    static data_t Y[MAT_SIZE] = {0};
 
-#pragma HLS ARRAY_PARTITION variable=A complete dim=2
-#pragma HLS ARRAY_PARTITION variable=B complete dim=1
-
-    axis_t temp;
-
-    // Read A
-    for(int i=0;i<N;i++){
-        for(int j=0;j<N;j++){
-            temp = in.read();
-            A[i][j] = *((float*)&temp.data);
-        }
+    // Streaming the transformation matrix(A)
+    for (size_t i = 0; i < MAT_SIZE; i++){
+        for (size_t j = 0; j < MAT_SIZE; j++){
+            axis_t in_pkt = in_stream.read();  // read one packet
+            A[i][j] = unpack(in_pkt.data);     // unpack data
+        }   
     }
-
-    // Read B
-    for(int i=0;i<N;i++){
-        for(int j=0;j<N;j++){
-            temp = in.read();
-            B[i][j] = *((float*)&temp.data);
+    
+    // Stream in X vectors one-by-one
+    for(int num_iter =0; num_iter < N; num_iter++){
+        
+        // Read elements of X vector
+        for(int j=0; j < MAT_SIZE; j++){
+            axis_t in_pkt = in_stream.read();  // read one packet
+            X[j] = unpack(in_pkt.data); // unpack data
         }
-    }
 
-    // Compute
-    for(int i=0;i<N;i++){
-        for(int j=0;j<N;j++){
-            float sum = 0;
-            for(int k=0;k<N;k++){
-                sum += A[i][k] * B[k][j];
-            }
-            C[i][j] = sum;
+        // Matrix multiplcation operation
+        for (size_t i = 0; i < MAT_SIZE; i++){
+            Y[i] = 0;
+            for (size_t j = 0; j < MAT_SIZE; j++) // calculate ith element
+                Y[i] += A[i][j]*X[j];            
         }
-    }
+        
+        // Stream out Y-vector one-by-one
+        for(int y_ind=0; y_ind<MAT_SIZE; y_ind++){
+            axis_t pkt;
+            pkt.data = pack(Y[y_ind]);
+            pkt.last = (i==MAT_SIZE-1 && (num_iter==N-1));
+            pkt.keep = -1;
 
-    // Write C
-    for(int i=0;i<N;i++){
-        for(int j=0;j<N;j++){
-            axis_t out_val;
-            out_val.data = *((int*)&C[i][j]);
-            out_val.last = (i==N-1 && j==N-1);
-            out.write(out_val);
+            out_stream.write(pkt);
+            /* 
+            TODO:
+            Can add other fields like strib, user, id, dest
+            */
         }
     }
 }
