@@ -44,7 +44,7 @@ void matmul_stream(hls::stream<axis_t> &in_stream,
     }
     
     // Stream in X vectors one-by-one
-    for(int num_iter =0; num_iter < N; num_iter++){
+    for(int num_iter = 0; num_iter < N; num_iter++){
         
         // Read elements of X vector
         for(int j=0; j < MAT_SIZE; j++){
