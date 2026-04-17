@@ -49,8 +49,8 @@ void matmul_stream(hls::stream<axis_t> &in_stream,
     static data_t Y[MAT_SIZE] = {0};
 
     // Streaming the transformation matrix(A)
-    for (size_t i = 0; i < MAT_SIZE; i++){
-        for (size_t j = 0; j < MAT_SIZE; j++){
+    for (int i = 0; i < MAT_SIZE; i++){
+        for (int j = 0; j < MAT_SIZE; j++){
             axis_t in_pkt = in_stream.read();  // read one packet
             A[i][j] = unpack(in_pkt.data);     // unpack data
         }   
@@ -66,9 +66,9 @@ void matmul_stream(hls::stream<axis_t> &in_stream,
         }
 
         // Matrix multiplcation operation
-        for (size_t i = 0; i < MAT_SIZE; i++){
+        for (int i = 0; i < MAT_SIZE; i++){
             Y[i] = 0;
-            for (size_t j = 0; j < MAT_SIZE; j++) // calculate ith element
+            for (int j = 0; j < MAT_SIZE; j++) // calculate ith element
                 Y[i] += A[i][j]*X[j];            
         }
         
