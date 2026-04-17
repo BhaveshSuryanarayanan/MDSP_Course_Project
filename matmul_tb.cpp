@@ -52,22 +52,22 @@ int main(){
 
     int N = 10;
 
-    std::string input_file = "test/input/" + std::to_string(N) + ".txt";
-    std::string matrix_file = "test/matrices/" + std::to_string(N) + ".txt";
-    std::string output_file = "test/output/" + std::to_string(N) + ".txt";
+    std::string input_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/input/" + std::to_string(N) + ".txt";
+    std::string matrix_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/matrices/" + std::to_string(N) + ".txt";
+    std::string output_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/output/" + std::to_string(N) + ".txt";
 
     std::vector<float> input = read_vector(input_file);
-    std::vector<vector<float>> matrix = read_matrix(matrix_file, N);
+    std::vector<std::vector<float>> matrix = read_matrix(matrix_file, N);
     std::vector<float> Y_expected = read_vector(output_file);
 
-    hls::stream<axis_pkt_t> in_stream("in");
-    hls::stream<axis_pkt_t> out_stream("out");
+    hls::stream<axis_t> in_stream("in");
+    hls::stream<axis_t> out_stream("out");
 
     float_bits conv;
 
     for(int i=0; i<N; i++){
         for(int j=0; j<N; j++){
-            axis_pkt_t pkt;
+            axis_t pkt;
             conv.f = matrix[i][j];
             pkt.data = (data_t)conv.u;
             pkt.keep = -1;
@@ -83,7 +83,7 @@ int main(){
     int num_inputs = 1;
     for(int num = 0; num < num_inputs; num++){
         for (int i = 0; i < N; i++){
-            axis_pkt_t pkt;
+            axis_t pkt;
             conv.f = input[i];
             pkt.data = (data_t)conv.u;
             pkt.keep = -1;
@@ -104,7 +104,7 @@ int main(){
         float err = 0;
         for(int i=0; i<N; i++){
             axis_t pkt = out_stream.read();
-            conv.u = (unsigned)(data_t) pt.data;
+            conv.u = (unsigned)(data_t) pkt.data;
             float y = conv.f;
             err += (y-Y_expected[i])*(y-Y_expected[i]);
         }
@@ -119,7 +119,7 @@ int main(){
     if (num_errors == 0)
         printf("PASS: %d samples matched (tolerance=%.0e)\n", num_inputs, TOLERANCE);
     else
-        printf("FAIL: %d / %d mismatches\n", errors, num_inputs);
+        printf("FAIL: %d / %d mismatches\n", num_errors, num_inputs);
 
     return num_errors ? 1 : 0;
 

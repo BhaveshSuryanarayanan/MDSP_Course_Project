@@ -18,6 +18,19 @@ static inline data_t unpack(ap_int<AP_SIZE> raw){
         return fb.f;  // reinterpret as float
     #endif
 }
+static inline ap_int<32> pack(data_t val) {
+#ifdef USE_FIXED
+	return (ap_int<32>)(val * (1 << 12));
+//    ap_int<32> raw = 0;
+//    raw.range(DATA_WIDTH - 1, 0) = val.range();
+//    return raw;
+#else
+    float_bits fb;
+    fb.f = val;
+    return (ap_int<32>)fb.u;
+#endif
+}
+
 
 // in_stream: input data (x)
 // out_stream: output data (y)
@@ -63,7 +76,7 @@ void matmul_stream(hls::stream<axis_t> &in_stream,
         for(int y_ind=0; y_ind<MAT_SIZE; y_ind++){
             axis_t pkt;
             pkt.data = pack(Y[y_ind]);
-            pkt.last = (i==MAT_SIZE-1 && (num_iter==N-1));
+            pkt.last = (y_ind==MAT_SIZE-1 && (num_iter==N-1));
             pkt.keep = -1;
 
             out_stream.write(pkt);
