@@ -52,9 +52,9 @@ int main(){
 
     int N = 10;
 
-    std::string input_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/input/" + std::to_string(N) + ".txt";
-    std::string matrix_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/matrices/" + std::to_string(N) + ".txt";
-    std::string output_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project-main/test/output/" + std::to_string(N) + ".txt";
+    std::string input_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project/test/input/" + std::to_string(N) + ".txt";
+    std::string matrix_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project/test/matrices/" + std::to_string(N) + ".txt";
+    std::string output_file = "/home/newielab1/ee23b016/project/MDSP_Course_Project/test/output/" + std::to_string(N) + ".txt";
 
     std::vector<float> input = read_vector(input_file);
     std::vector<std::vector<float>> matrix = read_matrix(matrix_file, N);
