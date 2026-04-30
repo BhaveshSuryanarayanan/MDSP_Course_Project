@@ -1,20 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define MAT_SIZE 10
+#include <ap_fixed.h>
 
-//#define USE_FLOAT
-#define USE_FIXED
+#define MAT_SIZE        10
+#define FRACTIONAL_BITS 20
 
-#ifdef USE_FIXED
-    #include <ap_fixed.h>
-	#define FRACTIONAL_BITS 14
-    typedef ap_fixed<16, 16-FRACTIONAL_BITS> data_t;
-    #define DATA_WIDTH 16
-#else
-    typedef float data_t;
-    #define USE_FLOAT
-    #define DATA_WIDTH 32   
-#endif
+typedef ap_fixed<32, 32 - FRACTIONAL_BITS> data_t;
 
 #endif
