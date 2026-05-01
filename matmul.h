@@ -7,14 +7,10 @@
 
 #define AP_SIZE 32
 
-// AXI stream data type
-// data | keep | strb | user | TLAST | id, dest 
-// TODO: configure these
-typedef ap_axis<AP_SIZE,0,0,0> axis_t;
-//typedef ap_uint<AP_SIZE> data_t;
+typedef ap_axis<AP_SIZE, 0, 0, 0> axis_t;
 
-void matmul_stream_2(hls::stream<axis_t> &,
-                   hls::stream<axis_t> &,
-                   int);
+void matmul_stream_2(hls::stream<axis_t> &in_stream,
+                     hls::stream<axis_t> &out_stream,
+                     int N);
 
 #endif

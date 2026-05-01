@@ -3,18 +3,17 @@
 
 #define MAT_SIZE 10
 
-//#define USE_FLOAT
+// Comment this line to build the floating-point implementation.
 #define USE_FIXED
 
 #ifdef USE_FIXED
     #include <ap_fixed.h>
-	#define FRACTIONAL_BITS 14
-    typedef ap_fixed<16, 16-FRACTIONAL_BITS> data_t;
-    #define DATA_WIDTH 16
+    #define FRACTIONAL_BITS 20
+    #define DATA_WIDTH 32
+    typedef ap_fixed<DATA_WIDTH, DATA_WIDTH - FRACTIONAL_BITS> data_t;
 #else
     typedef float data_t;
-    #define USE_FLOAT
-    #define DATA_WIDTH 32   
+    #define DATA_WIDTH 32
 #endif
 
 #endif
