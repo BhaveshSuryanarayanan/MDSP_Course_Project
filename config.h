@@ -8,7 +8,7 @@
 
 #ifdef USE_FIXED
     #include <ap_fixed.h>
-    #define FRACTIONAL_BITS 20
+    #define FRACTIONAL_BITS 26
     #define DATA_WIDTH 32
     typedef ap_fixed<DATA_WIDTH, DATA_WIDTH - FRACTIONAL_BITS> data_t;
 #else
