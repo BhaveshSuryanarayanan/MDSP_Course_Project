@@ -14,18 +14,18 @@ def normalize_matrix(A):
     return A if norm == 0 else A / norm
 
 # -----------------------------
-# Generate vector
+# Generate vectors
 # -----------------------------
-def generate_vector(n):
+def generate_vectors(n, ns):
     os.makedirs("test/input", exist_ok=True)
 
-    X = np.random.randn(n, 1)
-    X = normalize_vector(X)
+    X = np.random.randn(ns, n)
+    X = np.array([normalize_vector(sample) for sample in X])
 
     path = f"test/input/{n}.txt"
     np.savetxt(path, X, fmt="%.6f")
 
-    print(f"Vector saved to {path}")
+    print(f"{ns} input sample(s) saved to {path}")
     return X
 
 # -----------------------------
@@ -46,13 +46,13 @@ def generate_matrix(n):
 # -----------------------------
 # Main pipeline
 # -----------------------------
-def generate_all(n):
+def generate_all(n, ns):
     # Generate inputs
     A = generate_matrix(n)
-    X = generate_vector(n)
+    X = generate_vectors(n, ns)
 
-    # Compute Y = A * X
-    Y = np.matmul(A, X)
+    # Compute Y = A * X for each sample
+    Y = X @ A.T
 
     # Save output
     os.makedirs("test/output", exist_ok=True)
@@ -65,9 +65,10 @@ def generate_all(n):
 # CLI entry
 # -----------------------------
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <n>")
+    if len(sys.argv) != 3:
+        print("Usage: python generate_test.py <n> <Ns>")
         sys.exit(1)
 
     n = int(sys.argv[1])
-    generate_all(n)
+    ns = int(sys.argv[2])
+    generate_all(n, ns)

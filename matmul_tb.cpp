@@ -93,6 +93,19 @@ int main() {
     std::vector<std::vector<float>> matrix = read_matrix(matrix_file, N);
     std::vector<float> Y_expected = read_vector(output_file);
 
+    if (input.size() % N != 0) {
+        std::cerr << "Input sample count is not divisible by N: "
+                  << input.size() << " values for N=" << N << std::endl;
+        return 1;
+    }
+
+    int num_inputs = input.size() / N;
+    if (Y_expected.size() != input.size()) {
+        std::cerr << "Output size mismatch: expected " << input.size()
+                  << " values, got " << Y_expected.size() << std::endl;
+        return 1;
+    }
+
     hls::stream<axis_t> in_stream("in");
     hls::stream<axis_t> out_stream("out");
 
@@ -100,10 +113,9 @@ int main() {
         for (int j = 0; j < N; j++)
             in_stream.write(to_pkt(matrix[i][j]));
     
-    int num_inputs = 1;
     for (int num = 0; num < num_inputs; num++)
         for (int i = 0; i < N; i++)
-            in_stream.write(to_pkt(input[i], i == N - 1));
+            in_stream.write(to_pkt(input[num * N + i], i == N - 1));
     
 
     matmul_stream_2(in_stream, out_stream, num_inputs);
@@ -114,8 +126,9 @@ int main() {
         for (int i = 0; i < N; i++) {
             axis_t pkt = out_stream.read();
             float y = from_pkt(pkt);
-            err += (y - Y_expected[i]) * (y - Y_expected[i]);
-            std::cout << y << " " << Y_expected[i] << std::endl;
+            float expected = Y_expected[num * N + i];
+            err += (y - expected) * (y - expected);
+            std::cout << y << " " << expected << std::endl;
         }
         err = std::sqrt(err);
         cout << "L2 error: " << err << endl;

@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define MAT_SIZE 10
+#define MAT_SIZE 64
 
 // Comment this line to build the floating-point implementation.
 #define USE_FIXED
