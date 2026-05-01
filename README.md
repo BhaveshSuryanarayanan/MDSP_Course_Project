@@ -19,4 +19,5 @@ numpy on ARM - Vary matrix size (16x16, 32x32, 64x64) and report scaling
 exercises array partitioning and loop pipelining. The main challenge is managing BRAM usage for the
 matrix storage and resolving port conflicts for parallel access
 
-
+336 ms / sample
+1e-7 average error
