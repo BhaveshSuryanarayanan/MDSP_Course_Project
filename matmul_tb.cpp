@@ -128,7 +128,7 @@ int main() {
             float y = from_pkt(pkt);
             float expected = Y_expected[num * N + i];
             err += (y - expected) * (y - expected);
-            std::cout << y << " " << expected << std::endl;
+            // std::cout << y << " " << expected << std::endl;
         }
         err = std::sqrt(err);
         cout << "L2 error: " << err << endl;

@@ -52,6 +52,7 @@ def generate_all(n, ns):
     X = generate_vectors(n, ns)
 
     # Compute Y = A * X for each sample
+    
     Y = X @ A.T
 
     # Save output
