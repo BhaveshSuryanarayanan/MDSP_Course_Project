@@ -68,10 +68,11 @@ void matmul_stream_2(hls::stream<axis_t> &in_stream,
         // Matrix multiplcation operation
         matrix_mul:
         for (int i = 0; i < MAT_SIZE; i++) {
-            Y[i] = 0;
+            data_t temp = 0;
             ith_element:
             for (int j = 0; j < MAT_SIZE; j++) // calculate ith element
-                Y[i] += A[i][j] * X[j];
+                temp += A[i][j] * X[j];
+            Y[i] = temp;
         }
         
         // Stream out Y-vector one-by-one
